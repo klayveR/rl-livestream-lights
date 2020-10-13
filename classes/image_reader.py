@@ -71,8 +71,6 @@ class ImageReader():
                     rect = win32gui.GetWindowRect(hwnd)
                     screenshot = getRectAsImage(rect)
                     return screenshot
-            else:
-                print("Window not found!")
         else:
             screenshot = getScreenAsImage()
             return screenshot
