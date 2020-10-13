@@ -1,15 +1,10 @@
 from classes.stream_analyzer import StreamAnalyzer
-from classes.image_reader import ImageReader
 from classes.config import Config
 from classes.dialog import Dialog
 from classes.window_selector import WindowSelector
 from classes.hue_setup import HueSetup
 from classes.event_handler import EventHandler
-from enums.sender import Sender
-from phue import Bridge
 import threading
-import time
-import cv2
 import sys
 
 if __name__ == "__main__":
@@ -34,10 +29,11 @@ if __name__ == "__main__":
 
     print()
 
-    ### START STREAM ANALYZER ###
+    ### START EVENT HANDLER ###
     ehThread = threading.Thread(target=EventHandler, args=[config])
     ehThread.start()
 
+    ### START STREAM ANALYZER ###
     analyzerThread = threading.Thread(target=StreamAnalyzer, args=[config, window])
     analyzerThread.start()
     

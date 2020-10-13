@@ -87,7 +87,7 @@ class HueSetup:
         bridge = self.__select_bridge(self.config["hue"]["ip"])
         if bridge:
             self.config["hue"]["ip"] = bridge.ip
-            self.config["hue"]["lights"][GameState.IDLE.value] = self.__select_lights(bridge, GameState.IDLE.value)
+            self.config["hue"]["lights"][GameState.WAITING_FOR_GAME.value] = self.__select_lights(bridge, GameState.WAITING_FOR_GAME.value)
             self.config["hue"]["lights"][GameState.KICKOFF.value] = self.__select_lights(bridge, GameState.KICKOFF.value)
             self.config["hue"]["lights"][GameState.PLAYING.value] = self.__select_lights(bridge, GameState.PLAYING.value)
             self.config["hue"]["lights"][GameState.GOAL.value] = self.__select_lights(bridge, GameState.GOAL.value)
