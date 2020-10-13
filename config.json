@@ -1,0 +1,97 @@
+{
+    "hue": {
+        "ip": "",
+        "lights": {
+            "kickoff": [],
+            "playing": [],
+            "goal": [],
+            "end": [],
+            "idle": []
+        }
+    },
+    "delays": {
+        "goal": 10,
+        "playing": 3,
+        "end": 10
+    },
+    "areas": {
+        "goals_blue": {
+            "bounds": [
+                0.414,
+                0.01,
+                0.4447,
+                0.08
+            ],
+            "rotation": -4,
+            "threshold": 200,
+            "psm": 8,
+            "whitelist": "0123456789",
+            "customlang": true
+        },
+        "goals_orange": {
+            "bounds": [
+                0.556,
+                0.01,
+                0.5884,
+                0.08
+            ],
+            "rotation": 4,
+            "threshold": 200,
+            "psm": 8,
+            "whitelist": "0123456789",
+            "customlang": true
+        },
+        "time": {
+            "bounds": [
+                0.452,
+                0.02,
+                0.55,
+                0.062
+            ],
+            "rotation": 0,
+            "threshold": 100,
+            "psm": 7,
+            "whitelist": "0123456789:+",
+            "customlang": true
+        },
+        "replay": {
+            "bounds": [
+                0.029,
+                0.941,
+                0.104,
+                0.977
+            ],
+            "rotation": 0,
+            "threshold": 160,
+            "psm": 8,
+            "whitelist": "REPLAY",
+            "customlang": false
+        },
+        "winner": {
+            "bounds": [
+                0.449,
+                0.394,
+                0.551,
+                0.442
+            ],
+            "rotation": 0,
+            "threshold": 130,
+            "psm": 7,
+            "whitelist": "WINNER",
+            "customlang": false
+        },
+        "kickoff": {
+            "bounds": [
+                0.461,
+                0.303,
+                0.541,
+                0.3944
+            ],
+            "rotation": 0,
+            "threshold": 200,
+            "psm": 7,
+            "whitelist": "GO123",
+            "customlang": false
+        }
+    }
+}
