@@ -43,11 +43,15 @@ class Dialog:
                     invalid_selection = False
                     for n in selections:
                         if n.isnumeric():
-                            answer.append(int(n))
+                            n = int(n)
+                            if n >= 0 and n < len(list):
+                                answer.append(int(n))
+                            else:
+                                print(f"{n} is not a number between 0 and {len(list) - 1}")
+                                invalid_selection = True
                         else:
-                            print(f"{n} is not a number.")
+                            print(f"{n} is not a number")
                             invalid_selection = True
-
                     if not invalid_selection:
                         valid_input = True
 

@@ -21,18 +21,23 @@ class HueSetup:
         return bridges
 
     def __select_lights(self, bridge, state):
-        lights = bridge.lights
+        lights = bridge.get_light_objects('id')
         lights_names = []
 
-        for i in range(len(lights)):
+        for i in lights:
             lights_names.append(lights[i].name)
 
         selection = Dialog.ask_for_list_item(lights_names, f"Please select the lights you'd like to use for the {state} event (comma-seperated list)",\
             allow_multiple=True, allow_none=True)
 
-        print(f"You selected {len(selection)} lights for the {state} event")
+        index = 0
+        selected_lights = []
+        for i in lights:
+            if index in selection:
+                selected_lights.append(i)
+            index += 1
 
-        return selection
+        return selected_lights
 
     def __select_bridge(self, previous_ip = ""):
         if previous_ip != "":

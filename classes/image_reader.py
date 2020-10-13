@@ -13,7 +13,6 @@ class ImageReader():
     @staticmethod
     def read(im, bounds, rotation = 0, threshold = 127, psm = 7, whitelist = None, customlang = True):
         prepared = ImageReader.prepare_image(im, bounds, rotation, threshold)
-        cv2.imwrite("temp.jpg", prepared)
         config = f"--oem 3 --psm {psm}"
 
         if whitelist:
