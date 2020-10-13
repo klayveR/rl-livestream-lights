@@ -16,7 +16,7 @@ class Dialog:
 
     @staticmethod
     def ask_for_list_item(list, prompt, allow_multiple = False, allow_none = False):
-        print("\n-----------------")
+        print("-----------------")
         for i in range(len(list)):
             print(f"{i}: {list[i]}")
         print("-----------------")

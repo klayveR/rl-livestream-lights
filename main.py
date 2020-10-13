@@ -4,7 +4,10 @@ from classes.config import Config
 from classes.dialog import Dialog
 from classes.window_selector import WindowSelector
 from classes.hue_setup import HueSetup
+from classes.event_handler import EventHandler
+from enums.sender import Sender
 from phue import Bridge
+import threading
 import time
 import cv2
 import sys
@@ -29,6 +32,12 @@ if __name__ == "__main__":
     ### WINDOW SELECTION ###
     window = WindowSelector.select()
 
+    print()
+
     ### START STREAM ANALYZER ###
-    analyzer = StreamAnalyzer(config, window)
-    analyzer.start()
+    ehThread = threading.Thread(target=EventHandler, args=[config])
+    ehThread.start()
+
+    analyzerThread = threading.Thread(target=StreamAnalyzer, args=[config, window])
+    analyzerThread.start()
+    

@@ -91,6 +91,7 @@ class HueSetup:
             self.config["hue"]["lights"][GameState.KICKOFF.value] = self.__select_lights(bridge, GameState.KICKOFF.value)
             self.config["hue"]["lights"][GameState.PLAYING.value] = self.__select_lights(bridge, GameState.PLAYING.value)
             self.config["hue"]["lights"][GameState.GOAL.value] = self.__select_lights(bridge, GameState.GOAL.value)
+            self.config["hue"]["lights"][GameState.OVERTIME.value] = self.__select_lights(bridge, GameState.OVERTIME.value)
             self.config["hue"]["lights"][GameState.END.value] = self.__select_lights(bridge, GameState.END.value)
             Config.save(self.config)
 

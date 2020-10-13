@@ -6,13 +6,15 @@
             "playing": [],
             "goal": [],
             "end": [],
-            "idle": []
+            "idle": [],
+            "overtime": []
         }
     },
     "delays": {
-        "goal": 10,
+        "goal": 13.5,
         "playing": 3,
-        "end": 10
+        "end": 10,
+        "overtime": 1
     },
     "areas": {
         "goals_blue": {
@@ -49,9 +51,9 @@
                 0.062
             ],
             "rotation": 0,
-            "threshold": 100,
+            "threshold": 130,
             "psm": 7,
-            "whitelist": "0123456789:+",
+            "whitelist": "0123456789:+OVERTIME",
             "customlang": true
         },
         "replay": {
@@ -88,9 +90,9 @@
                 0.3944
             ],
             "rotation": 0,
-            "threshold": 200,
+            "threshold": 165,
             "psm": 7,
-            "whitelist": "GO123",
+            "whitelist": "GO123!",
             "customlang": false
         }
     }

@@ -1,7 +1,10 @@
 from enums.game_state import GameState
 from enums.team import Team
+from enums.sender import Sender
 from classes.image_reader import ImageReader
+from pydispatch import dispatcher
 import re
+import math
 import time
 
 class StreamAnalyzer():
@@ -9,58 +12,47 @@ class StreamAnalyzer():
         self.config = config
         self.window_title = window_title
         self.screenshot = None
-        self.running = False
         self.__reset()
+        self.run()
 
-    def start(self):
-        if not self.running:
-            self.running = True
-            self.__monitor()
-
-    def stop(self):
-        if self.running:
-            self.running = False
-
-    def __set_state(self, state, data = None):
-        print(f"Setting state to {state}, data: {data}")
-        self.state = state
-
-        if state.value in self.config["delays"]:
-            time.sleep(self.config["delays"][state.value])
-
-    def __monitor(self):
-        self.__set_state(GameState.IDLE)
+    def run(self):
+        print("Stream analyzer started")
+        self.__set_state(GameState.WAITING_FOR_GAME)
 
         while True:
-            if not self.running:
-                break
-
             self.screenshot = ImageReader.screenshot(self.window_title)
 
             if self.screenshot == None:
                 continue
 
-            if self.state == GameState.IDLE:
-                self.__monitor_idle()
+            if self.state == GameState.WAITING_FOR_GAME:
+                self.__analyze_waiting_for_game()
             elif self.state == GameState.KICKOFF:
-                self.__monitor_kickoff()
+                self.__analyze_kickoff()
             elif self.state == GameState.PLAYING:
-                self.__monitor_playing()
+                self.__analyze_playing()
             elif self.state == GameState.GOAL:
-                self.__monitor_goal()
-            elif self.state == GameState.REPLAY:
-                self.__monitor_replay()
+                self.__analyze_goal()
+            elif self.state == GameState.OVERTIME:
+                self.__analyze_overtime()
             elif self.state == GameState.END:
-                self.__monitor_end()
+                self.__analyze_end()
 
-    def __monitor_idle(self):
+    def __set_state(self, state, data = None):
+        self.state = state
+        dispatcher.send(message=data, signal=state, sender=Sender.STREAM_ANALYZER)
+
+        if state.value in self.config["delays"]:
+            time.sleep(self.config["delays"][state.value])
+
+    def __analyze_waiting_for_game(self):
         game_time = self.__read_game_time()
         if game_time:
             if game_time["seconds"] == 300:
                 self.game_time = game_time
                 self.__set_state(GameState.KICKOFF)
 
-    def __monitor_kickoff(self):
+    def __analyze_kickoff(self):
         kickoff_countdown = self.__read_kickoff_countdown()
         if kickoff_countdown != None:
             if kickoff_countdown == 0:
@@ -75,29 +67,42 @@ class StreamAnalyzer():
                 self.__set_state(GameState.PLAYING)
 
 
-    def __monitor_playing(self):
+    def __analyze_playing(self):
         game_time = self.__read_game_time()
         if game_time:
+            if game_time["overtime"] and not self.game_time["overtime"]:
+                self.__set_state(GameState.OVERTIME)
+
             self.game_time = game_time
 
         goals = self.__read_goals()
         if goals:
             if goals["scorer"] != None:
                 self.goals = goals
-                self.__set_state(GameState.GOAL, goals["scorer"])
 
+                ot = " in overtime" if self.game_time['overtime'] else ""
+                print(f"[{goals['blue']}-{goals['orange']}] {goals['scorer']} scored at {math.floor(self.game_time['seconds'] / 60)}:{self.game_time['seconds'] % 60}{ot}")
+
+                self.__set_state(GameState.GOAL, goals["scorer"])
+                
         if self.game_time["seconds"] == 0 and not self.game_time["overtime"]:
             if self.__has_team_won():
                 self.__set_state(GameState.END, self.__get_winning_team())
 
-    def __monitor_goal(self):
-        if (self.game_time == 0 and self.goals[Team.ORANGE.value] != self.goals[Team.BLUE.value]) or self.game_time["overtime"]:
+    def __analyze_goal(self):
+        if (self.game_time == 0 and self.goals[Team.ORANGE.value] == self.goals[Team.BLUE.value]) and not self.game_time["overtime"]:
+            self.__set_state(GameState.OVERTIME)
+        elif (self.game_time == 0 and self.goals[Team.ORANGE.value] != self.goals[Team.BLUE.value]) or self.game_time["overtime"]:
             self.__set_state(GameState.END, self.__get_winning_team())
         else:
             self.__set_state(GameState.KICKOFF)
 
-    def __monitor_end(self):
-        self.__set_state(GameState.IDLE)
+    def __analyze_overtime(self):
+        self.__set_state(GameState.KICKOFF)
+
+    def __analyze_end(self):
+        self.__reset()
+        self.__set_state(GameState.WAITING_FOR_GAME)
 
     def __read_goals(self):
         goals_blue = self.__read_team_goals(Team.BLUE)
@@ -144,15 +149,19 @@ class StreamAnalyzer():
     def __read_kickoff_countdown(self):
         text = ImageReader.read_area(self.screenshot, self.config["areas"]["kickoff"])
 
-        match = re.match(r"([123]{1}|GO)", text)
+        match = re.match(r"([123]{1}|GO)(!)?", text)
         if match != None:
-            if match[1] == "GO":
+            if match[1] == "GO" or match[1] == "GO!":
                 return 0
             else:
                 return int(match[1])
 
     def __read_game_time(self):
         text = ImageReader.read_area(self.screenshot, self.config["areas"]["time"])
+
+        if text == "OVERTIME" and not self.game_time["overtime"]:
+            return { "seconds": 0, "overtime": True }
+
         match = re.match(r"[+]?([0-9]):([0-5][0-9])", text)
         if match != None:
             minutes = int(match.group(1))
@@ -164,6 +173,6 @@ class StreamAnalyzer():
 
     def __reset(self):
         self.state = None
-        self.time = { "seconds": 0, "overtime": False }
+        self.game_time = { "seconds": 0, "overtime": False }
         self.goals = { "blue": 0, "orange": 0, "scorer": None }
         self.overtime = False

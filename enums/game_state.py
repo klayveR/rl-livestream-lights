@@ -1,9 +1,9 @@
 from enum import Enum
 
 class GameState(Enum):
-    IDLE = "idle"
+    WAITING_FOR_GAME = "waiting_for_game"
     KICKOFF = "kickoff"
     PLAYING = "playing"
     GOAL = "goal"
-    REPLAY = "replay"
+    OVERTIME = "overtime"
     END = "end"
