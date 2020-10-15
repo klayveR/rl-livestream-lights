@@ -1,13 +1,43 @@
 {
     "hue": {
         "ip": "",
-        "lights": {
-            "kickoff": [],
-            "playing": [],
-            "goal": [],
-            "end": [],
-            "idle": [],
-            "overtime": []
+        "lights": [],
+        "presets": {
+            "green": {
+                "xy": [
+                    0.3349,
+                    0.5761
+                ]
+            },
+            "orange": {
+                "xy": [
+                    0.5646,
+                    0.4128
+                ]
+            },
+            "blue": {
+                "xy": [
+                    0.1508,
+                    0.18
+                ]
+            },
+            "white": {
+                "xy": [
+                    0.4278,
+                    0.3324
+                ]
+            }
+        },
+        "flash": {
+            "intensity": 0.8,
+            "mode": 2,
+            "cycles": 5
+        },
+        "brightness": {
+            "kickoff": 160,
+            "playing": 40,
+            "goal": 254,
+            "end": 254
         }
     },
     "delays": {
@@ -38,7 +68,7 @@
                 0.08
             ],
             "rotation": 4,
-            "threshold": 200,
+            "threshold": 193,
             "psm": 8,
             "whitelist": "0123456789",
             "customlang": true

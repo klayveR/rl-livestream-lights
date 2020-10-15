@@ -4,11 +4,24 @@ from classes.dialog import Dialog
 from classes.window_selector import WindowSelector
 from classes.hue_setup import HueSetup
 from classes.event_handler import EventHandler
+from classes.hue_lights import HueLights
+from phue import Bridge
 import threading
 import sys
 
 if __name__ == "__main__":
     config = Config.read()
+
+    """
+    hue_lights = HueLights(config["hue"]["ip"])
+
+    presets = config["hue"]["presets"]
+    hue_lights.transition([4,7,8], presets["white"], brightness=200)
+    #hue_lights.flash_cycle([4,7,8], config["hue"]["presets"]["green"], cycles=3)
+    hue_lights.flash_cycle([4,5,7,8], presets["blue"], presets["blue"], cycles=3, intensity=config["hue"]["flash"]["intensity"])
+    hue_lights.flash([4,5,7,8], presets["orange"], presets["orange"], cycles=3, intensity=config["hue"]["flash"]["intensity"])
+    hue_lights.restore()
+    """
 
     ### HUE SETUP ###
     hue_setup = HueSetup(config)
@@ -24,14 +37,14 @@ if __name__ == "__main__":
         print("Setup was unsuccessful")
         sys.exit()
 
+    ### START EVENT HANDLER ###
+    ehThread = threading.Thread(target=EventHandler, args=[config])
+    ehThread.start()
+
     ### WINDOW SELECTION ###
     window = WindowSelector.select()
 
     print()
-
-    ### START EVENT HANDLER ###
-    ehThread = threading.Thread(target=EventHandler, args=[config])
-    ehThread.start()
 
     ### START STREAM ANALYZER ###
     analyzerThread = threading.Thread(target=StreamAnalyzer, args=[config, window])

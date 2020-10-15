@@ -1,18 +1,23 @@
 class Dialog:
     @staticmethod
     def ask_confirmation(prompt):
-        print()
-        input(prompt)
+        input(f"{prompt} (Enter to continue)")
 
     @staticmethod
     def ask_yes_no(prompt):
-        print()
-
         answer = 0
         while answer != "y" and answer != "n":
             answer = input(f"{prompt} (y/n) ")
 
         return answer == "y"
+
+    @staticmethod
+    def ask_number_in_range(prompt, min, max):
+        answer = "NaN"
+        while not answer.isnumeric() or int(answer) < min or int(answer) > max:
+            answer = input(f"{prompt} (Between {min}-{max}) ")
+
+        return int(answer)
 
     @staticmethod
     def ask_for_list_item(list, prompt, allow_multiple = False, allow_none = False):

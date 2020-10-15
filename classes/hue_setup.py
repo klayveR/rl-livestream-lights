@@ -1,5 +1,6 @@
 from classes.config import Config
 from classes.dialog import Dialog
+from classes.hue_lights import HueLights
 from enums.game_state import GameState
 from phue import Bridge
 import requests
@@ -20,15 +21,15 @@ class HueSetup:
 
         return bridges
 
-    def __select_lights(self, bridge, state):
+    def __select_lights(self, bridge):
         lights = bridge.get_light_objects('id')
         lights_names = []
 
         for i in lights:
             lights_names.append(lights[i].name)
 
-        selection = Dialog.ask_for_list_item(lights_names, f"Please select the lights you'd like to use for the {state} event (comma-seperated list)",\
-            allow_multiple=True, allow_none=True)
+        selection = Dialog.ask_for_list_item(lights_names, f"Please select the lights you'd like to use (comma-seperated list)",\
+            allow_multiple=True, allow_none=False)
 
         index = 0
         selected_lights = []
@@ -87,12 +88,41 @@ class HueSetup:
         bridge = self.__select_bridge(self.config["hue"]["ip"])
         if bridge:
             self.config["hue"]["ip"] = bridge.ip
-            self.config["hue"]["lights"][GameState.WAITING_FOR_GAME.value] = self.__select_lights(bridge, GameState.WAITING_FOR_GAME.value)
-            self.config["hue"]["lights"][GameState.KICKOFF.value] = self.__select_lights(bridge, GameState.KICKOFF.value)
-            self.config["hue"]["lights"][GameState.PLAYING.value] = self.__select_lights(bridge, GameState.PLAYING.value)
-            self.config["hue"]["lights"][GameState.GOAL.value] = self.__select_lights(bridge, GameState.GOAL.value)
-            self.config["hue"]["lights"][GameState.OVERTIME.value] = self.__select_lights(bridge, GameState.OVERTIME.value)
-            self.config["hue"]["lights"][GameState.END.value] = self.__select_lights(bridge, GameState.END.value)
+            self.config["hue"]["lights"] = self.__select_lights(bridge)
+
+            custom_colors = Dialog.ask_yes_no(f"Would you like to use custom light colors?")
+            if custom_colors:
+                hue_lights = HueLights(self.config["hue"]["ip"])
+                setup_light_id = self.config["hue"]["lights"][0]
+                setup_light = hue_lights.lights[setup_light_id]
+                Dialog.ask_confirmation(f"Please set your '{setup_light.name}' light to the color you want while playing")
+                self.config["hue"]["presets"]["white"] = hue_lights.get_light_state(setup_light_id, include_brightness=False)
+                Dialog.ask_confirmation(f"Please set your '{setup_light.name}' light to the color you want when blue scores")
+                self.config["hue"]["presets"]["blue"] = hue_lights.get_light_state(setup_light_id, include_brightness=False)
+                Dialog.ask_confirmation(f"Please set your '{setup_light.name}' light to the color you want when orange scores")
+                self.config["hue"]["presets"]["orange"] = hue_lights.get_light_state(setup_light_id, include_brightness=False)
+
+            custom_brightness = Dialog.ask_yes_no(f"Would you like to use custom light brightness?")
+            if custom_brightness:
+                self.config["hue"]["brightness"]["kickoff"] = Dialog.ask_number_in_range\
+                    ("How bright should the lights be during kickoff? (Default: 160)", 0, 254)
+                self.config["hue"]["brightness"]["playing"] = Dialog.ask_number_in_range\
+                    ("How bright should the lights be while playing? (Default: 80)", 0, 254)
+                self.config["hue"]["brightness"]["goal"] = Dialog.ask_number_in_range\
+                    ("How bright should the lights be when a goal is scored? (Default: 254)", 0, 254)
+                self.config["hue"]["brightness"]["end"] = Dialog.ask_number_in_range\
+                    ("How bright should the lights be at the end of the match? (Default: 254)", 0, 254)
+
+            flash_modes = ["No flashing", "All lights flash simultaneously", "Lights flash individually one after another"]
+            self.config["hue"]["flash"]["mode"] = Dialog.ask_for_list_item(flash_modes,\
+                "Please select the flash mode that should be used when a goal is scored (Default: 2):")
+
+            if self.config["hue"]["flash"]["mode"] != 0:
+                self.config["hue"]["flash"]["cycles"] = Dialog.ask_number_in_range\
+                    ("How many times should each light flash? (Default: 3)", 0, 10)
+                intensity = Dialog.ask_number_in_range("How intense should the flashing be? (Default: 70)", 0, 100)
+                self.config["hue"]["flash"]["intensity"] = intensity / 100
+
             Config.save(self.config)
 
             return True
